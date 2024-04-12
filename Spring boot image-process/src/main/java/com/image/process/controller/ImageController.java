@@ -1,6 +1,12 @@
 package com.image.process.controller;
 
+import com.image.process.exception.ColorNotSupportException;
+import com.image.process.exception.FileException;
+import com.image.process.exception.PathException;
 import com.image.process.service.ImageService;
+import com.image.process.utill.CommonUtil;
+import com.image.process.utill.ResultColor;
+import com.image.process.utill.TargetColor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +29,21 @@ public class ImageController {
     private ImageService imageService;
 
     @PostMapping("/color-change")
-    public ResponseEntity<String> imageColorChange(@RequestBody MultipartFile file) {
+    public ResponseEntity<String> imageColorChange(@RequestBody MultipartFile file,
+                                                   @RequestParam String targetColor,
+                                                   @RequestParam String resultColor) {
 //        This Approach not accept Big size image
 //        Make Sure you have increase the file size
-        if(file.isEmpty()) {
-            throw new RuntimeException("File is Empty");
+        if (file.isEmpty()) {
+            throw new FileException();
+        }
+
+        if (!TargetColor.GRAY.toString().equals(targetColor)) {
+            throw new ColorNotSupportException();
+        }
+
+        if (!ResultColor.PURPLE.toString().equals(resultColor)) {
+            throw new ColorNotSupportException();
         }
 
         String fileName = file.getOriginalFilename();
@@ -37,8 +53,6 @@ public class ImageController {
         log.info("File Type : {}", contentType);
 
         try {
-            File createFile = File.createTempFile("upload", "-" + file.getOriginalFilename());
-
 
             Path filePath = Paths.get(UPLOAD_DIRECTORY, file.getOriginalFilename());
 
@@ -54,6 +68,7 @@ public class ImageController {
 
         } catch (Exception ex) {
             log.error("Exception Message : {}", ex.getMessage());
+            throw new PathException("Path Exception Message : " + ex.getMessage());
         }
 
         return ResponseEntity.ok("Successfully Hit the endpoint");

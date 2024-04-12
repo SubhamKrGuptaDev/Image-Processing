@@ -1,5 +1,7 @@
 package com.image.process.service;
 
+import com.image.process.exception.FileException;
+import com.image.process.exception.ThreadException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +46,8 @@ public class ImageServiceImpl implements ImageService {
             ImageIO.write(outPutImage, "jpg", outputFile);
             log.info("Process Completed.");
         } catch (Exception ex) {
-            log.error("Exception Message : {}",ex.getMessage());
+            log.error("Exception Message : {}", ex.getMessage());
+            throw new FileException("File Exception Message : " + ex.getMessage());
         }
 
     }
@@ -55,7 +58,7 @@ public class ImageServiceImpl implements ImageService {
         int width = originalImage.getWidth();
         int height = originalImage.getHeight() / threadCount;
 
-        for(int i=0; i<threadCount; i++) {
+        for (int i = 0; i < threadCount; i++) {
             final int threadMultiplier = i;
             Thread thread = new Thread(() -> {
                 int xOrigin = 0;
@@ -67,15 +70,16 @@ public class ImageServiceImpl implements ImageService {
             listOfThread.add(thread);
         }
 
-        for(Thread thread : listOfThread) {
+        for (Thread thread : listOfThread) {
             thread.start();
         }
 
-        for(Thread thread : listOfThread) {
+        for (Thread thread : listOfThread) {
             try {
                 thread.join();
             } catch (Exception ex) {
                 log.error("Thread Join Exception. Message : {}", ex.getMessage());
+                throw new ThreadException("Thread Join Exception | Message : " + ex.getMessage());
             }
         }
 
@@ -86,10 +90,10 @@ public class ImageServiceImpl implements ImageService {
     }
 
     private void recolorImage(BufferedImage originalImage, BufferedImage resultImage, int leftCorner, int topCorner,
-                                    int width, int height) {
+                              int width, int height) {
 
-        for(int x = leftCorner; x < leftCorner + width && x < originalImage.getWidth(); x++) {
-            for(int y = topCorner; y < topCorner + height && y < originalImage.getHeight(); y++) {
+        for (int x = leftCorner; x < leftCorner + width && x < originalImage.getWidth(); x++) {
+            for (int y = topCorner; y < topCorner + height && y < originalImage.getHeight(); y++) {
                 recolorPixel(originalImage, resultImage, x, y);
             }
         }
@@ -107,7 +111,7 @@ public class ImageServiceImpl implements ImageService {
         int newGreen;
         int newBlue;
 
-        if(isShadeOfGray(red, green, blue)) {
+        if (isShadeOfGray(red, green, blue)) {
             newRed = Math.min(255, red + 10);
             newGreen = Math.max(0, green - 80);
             newBlue = Math.max(0, blue - 20);
