@@ -20,7 +20,7 @@ public class ImageServiceImpl implements ImageService {
 
 
     @Override
-    public void imageColorChangeGrayToPurple(String fileName) {
+    public String imageColorChangeGrayToPurple(String fileName) {
 
         try {
 
@@ -45,6 +45,8 @@ public class ImageServiceImpl implements ImageService {
 
             ImageIO.write(outPutImage, "jpg", outputFile);
             log.info("Process Completed.");
+
+            return outputFile.getAbsolutePath();
         } catch (Exception ex) {
             log.error("Exception Message : {}", ex.getMessage());
             throw new FileException("File Exception Message : " + ex.getMessage());

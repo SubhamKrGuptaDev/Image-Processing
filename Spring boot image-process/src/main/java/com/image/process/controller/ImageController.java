@@ -39,11 +39,11 @@ public class ImageController {
         }
 
         if (!TargetColor.GRAY.toString().equals(targetColor)) {
-            throw new ColorNotSupportException();
+            throw new ColorNotSupportException("Target Color Not Supported");
         }
 
         if (!ResultColor.PURPLE.toString().equals(resultColor)) {
-            throw new ColorNotSupportException();
+            throw new ColorNotSupportException("Result Color Not Supported");
         }
 
         String fileName = file.getOriginalFilename();
@@ -63,15 +63,14 @@ public class ImageController {
             log.info("File Path with name : {}", filePath.toAbsolutePath());
 
             log.info("Image Processing Start...");
-            imageService.imageColorChangeGrayToPurple(filePath.getFileName().toString());
+            String resultFileName = imageService.imageColorChangeGrayToPurple(filePath.getFileName().toString());
             log.info("Image Processing End...");
-
+            return ResponseEntity.ok("Absolute File Path : " + resultFileName);
         } catch (Exception ex) {
             log.error("Exception Message : {}", ex.getMessage());
             throw new PathException("Path Exception Message : " + ex.getMessage());
         }
 
-        return ResponseEntity.ok("Successfully Hit the endpoint");
     }
 
 }
